@@ -15,7 +15,7 @@ install:
 	npm install --save-dev webpack webpack-cli ts-loader typescript
 
 #ローカルwebサーバを起動
-server-run:
+server-run: $(TARGET)*
 	python -m http.server 8000
 
 clean:
