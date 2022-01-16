@@ -179,20 +179,6 @@ class Character {
     }
 
     /**
-     * 進行方向を角度を元に設定する
-     * @param {number} angle - 回転量（ラジアン）
-     */
-    setVectorFromAngle(angle) {
-        // 自身の回転量を設定する
-        this.angle = angle;
-        // ラジアンからサインとコサインを求める
-        let sin = Math.sin(angle);
-        let cos = Math.cos(angle);
-        // 自身の vector プロパティに設定する
-        this.vector.set(cos, sin);
-    }
-
-    /**
      * キャラクターを描画する
      */
     draw() {
