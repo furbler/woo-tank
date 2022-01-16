@@ -43,7 +43,7 @@ window.isKeyDown = {};
     //canvas やコンテキストを初期化する
     function initialize() {
         // 自機キャラクターを初期化する
-        tank_blue = new Tank(ctx, CANVAS_WIDTH * 0.3, CANVAS_HEIGHT * 0.9, 1.2, './image/tank_blue.png');
+        tank_blue = new Tank(ctx, CANVAS_WIDTH * 0.3, CANVAS_HEIGHT * 0.9, 1.2, './image/tank_blue.png', 0.4, './image/turret_blue.png');
 
         console.log('画像の読み込み完了しました！！');
     }

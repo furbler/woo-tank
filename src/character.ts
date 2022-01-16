@@ -225,17 +225,35 @@ class Character {
     }
 }
 
-//playerクラス
+//tankクラス
 export class Tank extends Character {
-    init_pos: Vector2; //初期位置
+    //初期位置
+    init_pos: Vector2;
+    //車体前方を基準にした砲塔の方向
+    angle_turret: number;
+    //砲塔のサイズ
+    width_turret: number;
+    height_turret: number;
+    //砲塔画像
+    imageTurret: HTMLImageElement;
 
-    constructor(ctx, x, y, scale_body: number, bodyImagePath: string) {
-        // 継承元の初期化
+    constructor(ctx, x, y, scale_body: number, bodyImagePath: string, scale_turret: number, turretImagePath: string) {
+        //車体を初期化
         super(ctx, x, y, scale_body, 5, bodyImagePath);
         this.init_pos = new Vector2(x, y);
+        //自身の移動スピード（update 一回あたりの移動量）
+        this.speed = 3;
 
-        this.speed = 3; //自身の移動スピード（update 一回あたりの移動量）
-
+        //砲塔画像読み込み
+        this.imageTurret = new Image();
+        this.imageTurret.addEventListener('load', () => {
+            // 画像のロードが完了したら準備完了フラグを立てる
+            this.ready = true;
+            //元画像のサイズと指定されたスケールからサイズを決定
+            this.width_turret = scale_turret * this.imageTurret.naturalWidth;
+            this.height_turret = scale_turret * this.imageTurret.naturalHeight;
+        }, false);
+        this.imageTurret.src = turretImagePath;
     }
 
 
@@ -281,10 +299,42 @@ export class Tank extends Character {
         let ty = Math.min(Math.max(this.position.y, 0), canvasHeight);
         this.position.set(tx, ty);
 
-        // 自機の車体を描画する
+        // 車体を描画する
         this.rotationDraw();
+        //砲塔を描画する
+        this.drawTurret();
 
         // 念の為グローバルなアルファの状態を元に戻す
         this.ctx.globalAlpha = 1.0;
+    }
+    //砲塔を描画
+    drawTurret() {
+        this.limitRange();
+        // 座標系を回転する前の状態を保存する
+        this.ctx.save();
+        // 自身の位置が座標系の中心と重なるように平行移動する
+        this.ctx.translate(this.position.x, this.position.y);
+        // 座標系を回転させる（270 度の位置を基準にするため Math.PI * 1.5 を引いている）
+        this.ctx.rotate(this.angle - AngleDefault);
+
+        // キャラクターの幅を考慮してオフセットする量
+        let offsetX = (this.width_turret / 2);
+        let offsetY = (this.height_turret / 2);
+
+        // キャラクターの幅やオフセットする量を加味して描画する
+        this.ctx.drawImage(
+            this.imageTurret,
+            -offsetX, // 先に translate で平行移動しているのでオフセットのみ行う
+            -offsetY, // 先に translate で平行移動しているのでオフセットのみ行う
+            this.width_turret,
+            this.height_turret
+        );
+
+        // 座標系を回転する前の状態に戻す
+        this.ctx.restore();
+
+        //描画時の位置と角度を保存
+        //this.prePosition.set(this.position.x, this.position.y);
+        //this.preAngle = this.angle;
     }
 }
