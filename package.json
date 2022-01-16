@@ -1,8 +1,8 @@
 {
-    "name": "flock-test",
+    "name": "woo-tank",
     "version": "0.0.1",
     "description": "",
-    "main": "index.js",
+    "main": "main.js",
     "scripts": {
         "tsc": "tsc",
         "build": "webpack"
