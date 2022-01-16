@@ -243,6 +243,8 @@ export class Tank extends Character {
         this.init_pos = new Vector2(x, y);
         //自身の移動スピード（update 一回あたりの移動量）
         this.speed = 3;
+        //車体と同じ向き
+        this.angle_turret = 0;
 
         //砲塔画像読み込み
         this.imageTurret = new Image();
@@ -291,6 +293,16 @@ export class Tank extends Character {
         //速度ベクトルを更新
         this.vector.set(Math.cos(this.angle), Math.sin(this.angle));
 
+        //キー入力で砲塔旋回
+        //砲塔左旋回
+        if (window.isKeyDown.key_q) {
+            this.angle_turret -= 4 * Math.PI / 180; // 1度
+        }
+        //砲塔右旋回
+        if (window.isKeyDown.key_e) {
+            this.angle_turret += 4 * Math.PI / 180; // 1度
+        }
+
 
         // 移動後の位置が画面外へ出ていないか確認して修正する
         let canvasWidth = this.ctx.canvas.width;
@@ -315,7 +327,7 @@ export class Tank extends Character {
         // 自身の位置が座標系の中心と重なるように平行移動する
         this.ctx.translate(this.position.x, this.position.y);
         // 座標系を回転させる（270 度の位置を基準にするため Math.PI * 1.5 を引いている）
-        this.ctx.rotate(this.angle - AngleDefault);
+        this.ctx.rotate(this.angle + this.angle_turret - AngleDefault);
 
         // キャラクターの幅を考慮してオフセットする量
         let offsetX = (this.width_turret / 2);
@@ -332,9 +344,5 @@ export class Tank extends Character {
 
         // 座標系を回転する前の状態に戻す
         this.ctx.restore();
-
-        //描画時の位置と角度を保存
-        //this.prePosition.set(this.position.x, this.position.y);
-        //this.preAngle = this.angle;
     }
 }
