@@ -24,39 +24,19 @@ window.isKeyDown = {};
 
     //ページのロードが完了したときに発火する load イベント
     window.addEventListener('load', () => {
-        // スタートボタンへの参照を取得
-        let button = document.body.querySelector('#start_button');
-        //タイトル表示への参照を取得
-        let caption = document.body.querySelector('#caption');
-        // スタートボタンが押されたときに初期化が実行されるようにする
-        button.addEventListener('click', () => {
-            //ボタンを削除
-            button.remove();
-            // ボタンを複数回押すことができないように disabled 属性を付与する
-            //button.disabled = true;
-            //タイトルを削除
-            caption.remove();
-            //canvas要素を作成
-            let canv = document.createElement('canvas');
-            canv.id = 'main_canvas';
-            //キャンバスをhtmlに追加
-            document.body.appendChild(canv);
+        // ユーティリティクラスを初期化
+        util = new Canvas2DUtility(document.body.querySelector('#main_canvas'));
+        // ユーティリティクラスから canvas を取得
+        canvas = util.canvas;
+        // ユーティリティクラスから 2d コンテキストを取得
+        ctx = util.context;
+        // canvas の大きさを設定
+        canvas.width = CANVAS_WIDTH;
+        canvas.height = CANVAS_HEIGHT;
 
-
-            // ユーティリティクラスを初期化
-            util = new Canvas2DUtility(document.body.querySelector('#main_canvas'));
-            // ユーティリティクラスから canvas を取得
-            canvas = util.canvas;
-            // ユーティリティクラスから 2d コンテキストを取得
-            ctx = util.context;
-            // canvas の大きさを設定
-            canvas.width = CANVAS_WIDTH;
-            canvas.height = CANVAS_HEIGHT;
-
-            // 初期化処理を行う
-            initialize();
-            loadCheck();
-        }, false);
+        // 初期化処理を行う
+        initialize();
+        loadCheck();
     }, false);
 
 
