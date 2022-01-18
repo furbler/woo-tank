@@ -231,11 +231,17 @@ export class Tank extends Character {
     init_pos: Vector2;
     //車体前方を基準にした砲塔の方向
     angle_turret: number;
+    //グローバル座標上の砲の向き
+    turret_vector: Vector2;
+
     //砲塔のサイズ
     width_turret: number;
     height_turret: number;
     //砲塔画像
     imageTurret: HTMLImageElement;
+
+    //自身が持つショットインスタンス
+    shotArray: Array<Shot>;
 
     constructor(ctx, x, y, scale_body: number, bodyImagePath: string, scale_turret: number, turretImagePath: string) {
         //車体を初期化
@@ -245,6 +251,8 @@ export class Tank extends Character {
         this.speed = 3;
         //車体と同じ向き
         this.angle_turret = 0;
+        //砲の向き
+        this.turret_vector = new Vector2(Math.cos(this.angle + this.angle_turret), Math.sin(this.angle + this.angle_turret));
 
         //砲塔画像読み込み
         this.imageTurret = new Image();
@@ -258,6 +266,11 @@ export class Tank extends Character {
         this.imageTurret.src = turretImagePath;
     }
 
+    //ショットを登録する
+    setShotArray(shotArray) {
+        // 自身のプロパティに設定する
+        this.shotArray = shotArray;
+    }
 
     //キャラクターの状態を更新し描画を行う
     update() {
@@ -303,6 +316,8 @@ export class Tank extends Character {
             this.angle_turret += 4 * Math.PI / 180; // 1度
         }
 
+        //砲の方向ベクトルを更新
+        this.turret_vector.set(Math.cos(this.angle + this.angle_turret), Math.sin(this.angle + this.angle_turret));
 
         // 移動後の位置が画面外へ出ていないか確認して修正する
         let canvasWidth = this.ctx.canvas.width;
@@ -310,6 +325,27 @@ export class Tank extends Character {
         let tx = Math.min(Math.max(this.position.x, this.width / 2), canvasWidth - this.width / 2);
         let ty = Math.min(Math.max(this.position.y, 0), canvasHeight);
         this.position.set(tx, ty);
+
+        // キーの押下状態を調べてショットを生成する
+        if (window.isKeyDown.key_z
+            || window.isKeyDown.key_Space
+            || window.isKeyDown.key_Enter
+        ) {
+            // ショットの生存を確認し非生存のものがあれば生成する
+            for (let i = 0; i < this.shotArray.length; ++i) {
+                // 非生存かどうかを確認する
+                if (this.shotArray[i].hp <= 0) {
+                    // 自機キャラクターの座標から少し離れた箇所にショットを生成する
+                    this.shotArray[i].set(this.position.x + this.turret_vector.x * 40, this.position.y + this.turret_vector.y * 40);
+                    //自ショットの進行方向ベクトルを砲身と同じ向きに設定
+                    this.shotArray[i].vector.set(this.turret_vector.x, this.turret_vector.y);
+                    //弾の向きを砲身と同じにする
+                    if (this.turret_vector.x !== 0) this.shotArray[i].angle = Math.atan2(this.turret_vector.y, this.turret_vector.x);
+                    // 生成できたらループを抜ける
+                    break;
+                }
+            }
+        }
 
         // 車体を描画する
         this.rotationDraw();
@@ -344,5 +380,54 @@ export class Tank extends Character {
 
         // 座標系を回転する前の状態に戻す
         this.ctx.restore();
+    }
+}
+
+
+export class Shot extends Character {
+    //自身のHP (0以下の時は画面上に存在しない)
+    hp: number;
+
+    constructor(ctx, x, y, speed: number, scale: number, imagePath: string) {
+        // 継承元の初期化
+        super(ctx, x, y, scale, 0, imagePath);
+        this.hp = 0;
+        this.speed = speed;
+    }
+
+    //画面上にショットを配置する
+    set(x: number, y: number) {
+        // 登場開始位置にショットを移動させる
+        this.position.set(x, y);
+        // ショットのライフを 0 より大きい値（生存の状態）に設定する
+        this.hp = 1;
+    }
+
+    setSpeed(speed: number) {
+        // 引数が有効な値ならスピードに設定する
+        if (speed != null && speed > 0) {
+            this.speed = speed;
+        }
+    }
+
+    //  弾の状態を更新し描画を行う
+    update() {
+        // もしショットのライフが 0 以下の場合はなにもしない
+        if (this.hp <= 0) { return; }
+
+        // ショットを進行方向に沿って移動させる
+        this.position.x += this.vector.x * this.speed;
+        this.position.y += this.vector.y * this.speed;
+
+        //画面外に出たら弾を消す
+        if (this.position.y < 0
+            || this.position.y > this.ctx.canvas.height
+            || this.position.x < 0
+            || this.position.x > this.ctx.canvas.width) {
+            this.hp = 0;
+            return;
+        }
+        // 座標系の回転を考慮した描画を行う
+        this.rotationDraw();
     }
 }

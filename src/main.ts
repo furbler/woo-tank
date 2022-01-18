@@ -1,5 +1,5 @@
 import { Canvas2DUtility } from "./canvas2d"
-import { Tank } from "./character"
+import { Tank, Shot } from "./character"
 
 //キーの押下状態を調べるためのオブジェクト
 window.isKeyDown = {};
@@ -19,6 +19,12 @@ window.isKeyDown = {};
 
     //自機キャラクターのインスタンス
     let tank_blue: Tank = null;
+
+    //弾のインスタンスを格納する配列
+    let shotArray: Array<Shot> = [];
+
+    //ショットの最大個数
+    const SHOT_MAX_COUNT = 100;
 
     let mainRequestID: number = null;
 
@@ -44,6 +50,13 @@ window.isKeyDown = {};
     function initialize() {
         // 自機キャラクターを初期化する
         tank_blue = new Tank(ctx, CANVAS_WIDTH * 0.3, CANVAS_HEIGHT * 0.9, 1.2, './image/tank_blue.png', 0.4, './image/turret_blue.png');
+
+        //弾を初期化する
+        for (let i = 0; i < SHOT_MAX_COUNT; ++i) {
+            shotArray[i] = new Shot(ctx, 0, 0, 3, 1, './image/bullet.png');
+        }
+        //弾を戦車に登録する
+        tank_blue.setShotArray(shotArray);
 
         console.log('画像の読み込み完了しました！！');
     }
@@ -76,8 +89,7 @@ window.isKeyDown = {};
             //スペースの場合
             if (event.key === ' ') {
                 // キーの押下状態を管理するオブジェクトに押下されたことを設定する
-                window.isKeyDown['key_Space'] = true;
-                console.log('スペースキー押されてるよ');
+                window.isKeyDown[`key_Space`] = true;
             }
         }, false);
 
@@ -89,7 +101,7 @@ window.isKeyDown = {};
             //スペースの場合
             if (event.key === ' ') {
                 // キーの押下状態を管理するオブジェクトに押下されたことを設定する
-                window.isKeyDown['key_Space'] = false;
+                window.isKeyDown[`key_Space`] = false;
             }
         }, false);
 
@@ -104,6 +116,11 @@ window.isKeyDown = {};
         util.drawRect(0, 0, canvas.width, canvas.height, '#000000');
 
         tank_blue.update();
+
+        // すべてのショットの状態を更新する
+        shotArray.map((shot) => {
+            shot.update();
+        });
 
         // 恒常ループのために描画処理を再帰呼出しする
         mainRequestID = requestAnimationFrame(update);
