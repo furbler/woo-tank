@@ -6,7 +6,7 @@ window.isKeyDown = {};
 
 (() => {
     //canvas の幅
-    const CANVAS_WIDTH = 900;
+    const CANVAS_WIDTH = 600;
     //canvas の高さ
     const CANVAS_HEIGHT = 600;
 

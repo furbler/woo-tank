@@ -233,6 +233,10 @@ export class Tank extends Character {
     angle_turret: number;
     //グローバル座標上の砲の向き
     turret_vector: Vector2;
+    //ショットを撃ってからの時間計測用カウンタ
+    shotCheckCounter: number;
+    //次のショットを撃つことができるまでのフレーム数
+    shotInterval: number;
 
     //砲塔のサイズ
     width_turret: number;
@@ -253,6 +257,9 @@ export class Tank extends Character {
         this.angle_turret = 0;
         //砲の向き
         this.turret_vector = new Vector2(Math.cos(this.angle + this.angle_turret), Math.sin(this.angle + this.angle_turret));
+
+        this.shotCheckCounter = 0;
+        this.shotInterval = 10;
 
         //砲塔画像読み込み
         this.imageTurret = new Image();
@@ -331,21 +338,28 @@ export class Tank extends Character {
             || window.isKeyDown.key_Space
             || window.isKeyDown.key_Enter
         ) {
-            // ショットの生存を確認し非生存のものがあれば生成する
-            for (let i = 0; i < this.shotArray.length; ++i) {
-                // 非生存かどうかを確認する
-                if (this.shotArray[i].hp <= 0) {
-                    // 自機キャラクターの座標から少し離れた箇所にショットを生成する
-                    this.shotArray[i].set(this.position.x + this.turret_vector.x * 40, this.position.y + this.turret_vector.y * 40);
-                    //自ショットの進行方向ベクトルを砲身と同じ向きに設定
-                    this.shotArray[i].vector.set(this.turret_vector.x, this.turret_vector.y);
-                    //弾の向きを砲身と同じにする
-                    if (this.turret_vector.x !== 0) this.shotArray[i].angle = Math.atan2(this.turret_vector.y, this.turret_vector.x);
-                    // 生成できたらループを抜ける
-                    break;
+            //前回の発射から一定時間経過していれば発射可能
+            if (this.shotCheckCounter >= 0) {
+                // ショットの生存を確認し非生存のものがあれば生成する
+                for (let i = 0; i < this.shotArray.length; ++i) {
+                    // 非生存かどうかを確認する
+                    if (this.shotArray[i].hp <= 0) {
+                        // 自機キャラクターの座標から少し離れた箇所にショットを生成する
+                        this.shotArray[i].set(this.position.x + this.turret_vector.x * 40, this.position.y + this.turret_vector.y * 40);
+                        //自ショットの進行方向ベクトルを砲身と同じ向きに設定
+                        this.shotArray[i].vector.set(this.turret_vector.x, this.turret_vector.y);
+                        //弾の向きを砲身と同じにする
+                        if (this.turret_vector.x !== 0) this.shotArray[i].angle = Math.atan2(this.turret_vector.y, this.turret_vector.x);
+                        // ショットを生成したので次弾発射までのインターバルを設定する
+                        this.shotCheckCounter = -this.shotInterval;
+                        // 生成できたらループを抜ける
+                        break;
+                    }
                 }
             }
         }
+        // ショットチェック用のカウンタをインクリメントする(オーバーフロー対策のため制限をかけておく)
+        if (this.shotCheckCounter < 5) ++this.shotCheckCounter;
 
         // 車体を描画する
         this.rotationDraw();
