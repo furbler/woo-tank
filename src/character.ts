@@ -433,14 +433,32 @@ export class Shot extends Character {
         this.position.x += this.vector.x * this.speed;
         this.position.y += this.vector.y * this.speed;
 
-        //画面外に出たら弾を消す
-        if (this.position.y < 0
-            || this.position.y > this.ctx.canvas.height
-            || this.position.x < 0
-            || this.position.x > this.ctx.canvas.width) {
-            this.hp = 0;
-            return;
+        //画面端で弾を反射させる
+        //上下の壁で反射
+        if (this.position.y < 0) {
+            this.vector.y *= -1;
+            this.position.y = 0;
+            //弾の角度修正
+            if (this.vector.x !== 0) this.angle = Math.atan2(this.vector.y, this.vector.x);
+        } else if (this.position.y > this.ctx.canvas.height) {
+            this.vector.y *= -1;
+            this.position.y = this.ctx.canvas.height;
+            //弾の角度修正
+            if (this.vector.x !== 0) this.angle = Math.atan2(this.vector.y, this.vector.x);
         }
+        //左右の壁で反射
+        if (this.position.x < 0) {
+            this.vector.x *= -1;
+            this.position.x = 0;
+            //弾の角度修正
+            if (this.vector.x !== 0) this.angle = Math.atan2(this.vector.y, this.vector.x);
+        } else if (this.position.x > this.ctx.canvas.width) {
+            this.vector.x *= -1;
+            this.position.x = this.ctx.canvas.width;
+            //弾の角度修正
+            if (this.vector.x !== 0) this.angle = Math.atan2(this.vector.y, this.vector.x);
+        }
+
         // 座標系の回転を考慮した描画を行う
         this.rotationDraw();
     }
