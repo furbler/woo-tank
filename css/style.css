@@ -21,3 +21,7 @@ canvas {
 #start_button:hover {
     opacity: 0.5;
 }
+
+p{
+    margin-bottom: 10px;
+}
